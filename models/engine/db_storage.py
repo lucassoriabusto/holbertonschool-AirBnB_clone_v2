@@ -11,6 +11,7 @@ from models.state import State
 from models.user import User
 from models.base_model import Base
 
+
 class DBStorage:
     """class DBStorage"""
     __engine = None
@@ -21,13 +22,24 @@ class DBStorage:
                 environ('HBNB_MYSQL_USER'), environ('HBNB_MYSQL_PWD'),
                 environ('HBNB_MYSQL_HOST'), environ('HBNB_MYSQL_DB')),
                 pool_pre_ping=True)
-        
+
         if environ('HBNB_ENV') == 'test':
             Base.metadata.drop_all(bind=self.__engine)
 
     def all(self, cls=None):
         """Return the table"""
+        if cls is None:
+            objects = self.__session.query(User, State, City, Amenity, Place,
+                                           Review).all()
+        else:
+            objects = self.__session.query(cls).all()
 
+        result = {}
+        for obj in objects:
+            key = "{}.{}". format(type(obj).__name__, obj.id)
+            result[key] = obj
+
+        return result
 
     def new(self, obj):
         """create a new"""
@@ -43,7 +55,7 @@ class DBStorage:
             self.session.delete(obj)
 
     def reload(self):
-       """Reload"""
-       Base.metadata.create_all(self.__engine)
-       current_session = sessionmaker(self.__engine, expire_on_commit=False)
-       self.__session = scoped_session(current_session)
+        """Reload"""
+        Base.metadata.create_all(self.__engine)
+        current_session = sessionmaker(self.__engine, expire_on_commit=False)
+        self.__session = scoped_session(current_session)
