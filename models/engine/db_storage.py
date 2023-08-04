@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from os import getenv
+from os import environ
 import MySQLdb
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -15,6 +15,18 @@ class DBStorage:
     """class DBStorage"""
     __engine = None
     __session = None
+
+    def __init__(self):
+        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'. format(
+                environ('HBNB_MYSQL_USER'), environ('HBNB_MYSQL_PWD'),
+                environ('HBNB_MYSQL_HOST'), environ('HBNB_MYSQL_DB')),
+                pool_pre_ping=True)
+        
+        if environ('HBNB_ENV') == 'test':
+            Base.metadata.drop_all(bind=self.__engine)
+
+    def all(self, cls=None):
+        """Return the table"""
 
 
     def new(self, obj):
