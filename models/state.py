@@ -24,4 +24,8 @@ class State(BaseModel, Base):
             con state_id igual al State.id actual """
             from models import storage
             city_instances = storage.all(City)
-            return [city for city in city_instances.values() if city.state_id == self.id]
+            matching_cities = []
+            for city in city_instances.values():
+                if city.state_id == self.id:
+                    matching_cities.append(city)
+            return matching_cities
