@@ -15,22 +15,27 @@ from models.base_model import Base
 
 class DBStorage:
     """class DBStorage"""
+
     __engine = None
     __session = None
 
     def __init__(self):
-        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(
-                getenv('HBNB_MYSQL_USER'), getenv('HBNB_MYSQL_PWD'),
-                getenv('HBNB_MYSQL_HOST'), getenv('HBNB_MYSQL_DB')),
-                pool_pre_ping=True)
+        self.__engine = create_engine(
+            "mysql+mysqldb://{}:{}@{}/{}".format(
+                getenv("HBNB_MYSQL_USER"),
+                getenv("HBNB_MYSQL_PWD"),
+                getenv("HBNB_MYSQL_HOST"),
+                getenv("HBNB_MYSQL_DB")),
+            pool_pre_ping=True,
+        )
 
-        if getenv('HBNB_ENV') == 'test':
+        if getenv("HBNB_ENV") == "test":
             Base.metadata.drop_all(bind=self.__engine)
 
     def all(self, cls=None):
         """Return the table"""
         from console import HBNBCommand
-        
+
         data = {}
 
         if cls in HBNBCommand.classes.values():
@@ -40,7 +45,7 @@ class DBStorage:
 
         else:
             for table in HBNBCommand.classes.values():
-                if table.__name__ != 'BaseModel':
+                if table.__name__ != "BaseModel":
                     result = self.__session.query(table).all()
                     for x in result:
                         string = f"{table.__name__}.{x.id}"
