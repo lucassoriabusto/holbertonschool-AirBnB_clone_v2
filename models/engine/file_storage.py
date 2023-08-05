@@ -73,7 +73,8 @@ class FileStorage:
             key = f"{obj.__class__.__name__}.{obj.id}"
             # Generate a unique key for the object using
             # its class name and 'id' attribute.
-            if key in self.__objects:
+            if key in FileStorage.__objects:
                 # If the key exists in the '__objects' dictionary
-                del self.__objects[key]
-            # Delete the corresponding object from the dictionary.
+                del FileStorage.__objects[key]
+                # Delete the corresponding object from the dictionary.
+                self.save
