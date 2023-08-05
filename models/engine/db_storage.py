@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+"""DBStorage storage class"""
 from os import getenv
 import MySQLdb
 from sqlalchemy import create_engine, MetaData
@@ -18,7 +19,7 @@ class DBStorage:
     __session = None
 
     def __init__(self):
-        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'. format(
+        self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'.format(
                 getenv('HBNB_MYSQL_USER'), getenv('HBNB_MYSQL_PWD'),
                 getenv('HBNB_MYSQL_HOST'), getenv('HBNB_MYSQL_DB')),
                 pool_pre_ping=True)
