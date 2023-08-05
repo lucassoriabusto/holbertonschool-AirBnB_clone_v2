@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from os import environ
+from os import getenv
 import MySQLdb
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker, scoped_session
@@ -19,27 +19,33 @@ class DBStorage:
 
     def __init__(self):
         self.__engine = create_engine('mysql+mysqldb://{}:{}@{}/{}'. format(
-                environ('HBNB_MYSQL_USER'), environ('HBNB_MYSQL_PWD'),
-                environ('HBNB_MYSQL_HOST'), environ('HBNB_MYSQL_DB')),
+                getenv('HBNB_MYSQL_USER'), getenv('HBNB_MYSQL_PWD'),
+                getenv('HBNB_MYSQL_HOST'), getenv('HBNB_MYSQL_DB')),
                 pool_pre_ping=True)
 
-        if environ('HBNB_ENV') == 'test':
+        if getenv('HBNB_ENV') == 'test':
             Base.metadata.drop_all(bind=self.__engine)
 
     def all(self, cls=None):
         """Return the table"""
-        if cls is None:
-            objects = self.__session.query(User, State, City, Amenity, Place,
-                                           Review).all()
+        from console import HBNBCommand
+        
+        data = {}
+
+        if cls in HBNBCommand.classes.values():
+            result = self.__session.query(cls).all()
+            for x in result:
+                data[f"{cls.__name__}.{x.id}"] = x
+
         else:
-            objects = self.__session.query(cls).all()
+            for table in HBNBCommand.classes.values():
+                if table.__name__ != 'BaseModel':
+                    result = self.__session.query(table).all()
+                    for x in result:
+                        string = f"{table.__name__}.{x.id}"
+                        data[string] = x
 
-        result = {}
-        for obj in objects:
-            key = "{}.{}". format(type(obj).__name__, obj.id)
-            result[key] = obj
-
-        return result
+        return data
 
     def new(self, obj):
         """create a new"""
