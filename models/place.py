@@ -3,7 +3,14 @@
 from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String, Integer, Float, ForeignKey
 from sqlalchemy.orm import relationship
+import os
 
+
+place_amenity = Table('place_amenity', Base.metadata,
+                          Column('place_id', String(60),
+                                ForeignKey('places.id'), primary_key=True),
+                          Column('amenity_id', String(60),
+                              ForeignKey('amenities.id'), primary_key=True))
 
 class Place(BaseModel, Base):
     """A place to stay"""
@@ -22,17 +29,42 @@ class Place(BaseModel, Base):
     longitude = Column(Float, nullable=True)
     amenity_ids = []
 
-    reviews = relationship("Review", cascade="all, delete",
-                           backref="place")
-    
-    @property
-    def reviews(self):
-        """Reviews"""
-        from models import storage
-        from models.review import Review
+
+    if os.getenv('HBNB_TYPE_STORAGE') == 'db':
+        reviews = relationship("Review", cascade="all, delete",
+                                backref="place")
+
+        amenities = relationship("Amenity", secondary="place_amenity",
+                                viewonly=False)
+    else:
+        @property
+        def reviews(self):
+            """Reviews"""
+            from models import storage
+            from models.review import Review
         
-        list = []
-        for x in storage.all(Review):
-            if x.place_id == self.id:
-                list.append(x)
-        return list
+            list = []
+            for x in storage.all(Review):
+                if x.place_id == self.id:
+                    list.append(x)
+            return list
+
+        @property
+        def amenities(self):
+            from models import storage
+            from models.amenity import Amenity
+
+            amenity_instances = []
+            for amenity_id in self.amenity_ids:
+                amenity_instance = storage.get(Amenity, amenity_id)
+                if amenity_instance is not None:
+                    amenity_instances.append(amenity_instance)
+            return amenity_instances
+        
+        @amenities.setter
+        def amenities(self, amenity_obj):
+            from models.amenity import Amenity
+
+            if isinstance(amenity_obj, Amenity):
+                if amenity_obj.id not in self.amenity_ids:
+                    self.amenity_ids.append(amenity_obj.id)
