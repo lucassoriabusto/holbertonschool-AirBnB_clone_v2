@@ -72,5 +72,4 @@ class Place(BaseModel, Base):
             from models.amenity import Amenity
 
             if isinstance(amenity_obj, Amenity):
-                if amenity_obj.id not in self.amenity_ids:
-                    self.amenity_ids.append(amenity_obj.id)
+                self.amenity_ids.append(amenity_obj.id)
