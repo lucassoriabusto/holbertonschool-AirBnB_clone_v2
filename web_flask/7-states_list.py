@@ -14,10 +14,10 @@ def states_list():
     states = storage.all(State)
     return render_template("7-states_list.html", states=states)
 
-    """ Cerrar la sesión de SQLAlchemy después de cada solicitud """
-    @app.teardown_appcontext
-    def teardown_db(exception):
-        storage.close()
+""" Cerrar la sesión de SQLAlchemy después de cada solicitud """
+@app.teardown_appcontext
+def teardown_db(exception):
+    storage.close()
 
 
 if __name__ == "__main__":
